@@ -109,11 +109,20 @@
     }
   }
 
-  function mostrarTelaAcertos() {
-    const empresa = document.getElementById("empresaNome").value.trim();
-    localStorage.setItem("empresa_nome", empresa);
-    window.location.href = "#telaAcertos"; // Parte 2 criará a tela
-  }
+function mostrarTelaAcertos() {
+  const empresa = document.getElementById("empresaNome").value.trim();
+  localStorage.setItem("empresa_nome", empresa);
+
+  // Esconde a tela atual
+  document.getElementById("appBox").classList.add("hidden");
+
+  // Mostra a tela de acertos
+  document.getElementById("telaAcertos").classList.remove("hidden");
+
+  // Limpa campos e lista os acertos já salvos
+  listarAcertos();
+}
+
 </script>
 <!-- === TELA DE ACERTOS === -->
 <div class="app hidden" id="telaAcertos">
