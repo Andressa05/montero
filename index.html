@@ -68,6 +68,25 @@
       font-size: 12px;
       color: #555;
     }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #eee;
+    }
   </style>
 </head>
 <body>
@@ -75,29 +94,23 @@
 <div class="login" id="loginBox">
   <h2>Login</h2>
   <label>Usuário:</label>
-  <input type="text" id="loginUser" placeholder="master" />
+  <input type="text" id="loginUser" />
   <label>Senha:</label>
-  <input type="password" id="loginPass" placeholder="123mudar" />
+  <input type="password" id="loginPass" />
   <button class="btn" onclick="fazerLogin()">Entrar</button>
   <p id="loginErro" style="color:red; display:none;">Usuário ou senha inválidos.</p>
 </div>
 
 <div class="app hidden" id="appBox">
   <h2>Controle de Acertos</h2>
-
-  <!-- Nome Personalizado da Empresa -->
   <label>Nome da Empresa (será usado no PDF):</label>
   <input type="text" id="empresaNome" placeholder="Ex: Transportadora XYZ" />
   <p class="small">Deixe em branco se não quiser exibir no PDF.</p>
-
   <hr />
-
-  <!-- Botão para seguir para tela de acertos -->
   <button class="btn" onclick="mostrarTelaAcertos()">Ir para Acertos</button>
 </div>
 
 <script>
-  // Login básico
   function fazerLogin() {
     const u = document.getElementById("loginUser").value.trim();
     const s = document.getElementById("loginPass").value.trim();
@@ -109,40 +122,29 @@
     }
   }
 
-function mostrarTelaAcertos() {
-  const empresa = document.getElementById("empresaNome").value.trim();
-  localStorage.setItem("empresa_nome", empresa);
-
-  // Esconde a tela atual
-  document.getElementById("appBox").classList.add("hidden");
-
-  // Mostra a tela de acertos
-  document.getElementById("telaAcertos").classList.remove("hidden");
-
-  // Limpa campos e lista os acertos já salvos
-  listarAcertos();
-}
-
+  function mostrarTelaAcertos() {
+    const empresa = document.getElementById("empresaNome").value.trim();
+    localStorage.setItem("empresa_nome", empresa);
+    document.getElementById("appBox").classList.add("hidden");
+    document.getElementById("telaAcertos").classList.remove("hidden");
+    listarAcertos();
+  }
 </script>
-<!-- === TELA DE ACERTOS === -->
+
 <div class="app hidden" id="telaAcertos">
   <h2>Acertos de Viagem</h2>
-
   <div class="row">
     <label>Data:</label>
     <input type="date" id="dataAcerto" />
   </div>
-
   <div class="row">
     <label>Motorista:</label>
     <input type="text" id="motorista" />
   </div>
-
   <div class="row">
     <label>Caminhão:</label>
     <input type="text" id="caminhao" />
   </div>
-
   <div class="flex row">
     <div style="flex:1">
       <label>Frete (R$):</label>
@@ -153,28 +155,18 @@ function mostrarTelaAcertos() {
       <input type="number" id="comissao" />
     </div>
   </div>
-
-  <div class="flex row">
-    <div style="flex:1">
-      <label>Adiantamento (R$):</label>
-      <input type="number" id="adiantamento" />
-    </div>
-    <div style="flex:1">
-      <label>Forma Pagamento:</label>
-      <select id="forma">
-        <option>Dinheiro</option>
-        <option>PIX</option>
-        <option>Transferência</option>
-      </select>
-    </div>
+  <div class="row">
+    <label>Forma Pagamento:</label>
+    <select id="forma">
+      <option>Dinheiro</option>
+      <option>PIX</option>
+      <option>Transferência</option>
+    </select>
   </div>
-
   <div class="row">
     <label>Observação:</label>
     <textarea id="observacao" rows="2"></textarea>
   </div>
-
-  <!-- Despesas -->
   <div class="row">
     <label>Despesa:</label>
     <div class="flex">
@@ -184,23 +176,18 @@ function mostrarTelaAcertos() {
     </div>
     <ul id="listaDespesas"></ul>
   </div>
-
   <button class="btn" onclick="salvarAcerto()">Salvar Acerto</button>
   <hr>
-
-  <!-- Filtro por data -->
   <div class="flex row">
     <input type="date" id="filtroInicio" />
     <input type="date" id="filtroFim" />
     <button onclick="listarAcertos()">Filtrar</button>
   </div>
-
-  <!-- Tabela -->
-  <table border="1" width="100%" style="margin-top:10px; text-align:center">
+  <table>
     <thead>
-      <tr style="background:#eee">
-        <th>Data</th><th>Motorista</th><th>Caminhão</th><th>Frete</th><th>Comissão</th><th>Adiant</th>
-        <th>Despesas</th><th>Sobra</th><th>A Pagar</th><th>PDF</th>
+      <tr>
+        <th>Data</th><th>Motorista</th><th>Caminhão</th><th>Frete</th><th>Comissão</th>
+        <th>Despesas</th><th>Sobra</th><th>PDF</th>
       </tr>
     </thead>
     <tbody id="tabelaAcertos"></tbody>
@@ -209,124 +196,101 @@ function mostrarTelaAcertos() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  let despesasTemp = []
+  let despesasTemp = [];
 
   function adicionarDespesa() {
-    const desc = document.getElementById("descDespesa").value
-    const val = parseFloat(document.getElementById("valorDespesa").value)
-    if (!desc || isNaN(val)) return alert("Preencha despesa e valor.")
-
-    despesasTemp.push({ desc, val })
-    document.getElementById("descDespesa").value = ""
-    document.getElementById("valorDespesa").value = ""
-    atualizarListaDespesas()
+    const desc = document.getElementById("descDespesa").value;
+    const val = parseFloat(document.getElementById("valorDespesa").value);
+    if (!desc || isNaN(val)) return alert("Preencha despesa e valor.");
+    despesasTemp.push({ desc, val });
+    document.getElementById("descDespesa").value = "";
+    document.getElementById("valorDespesa").value = "";
+    atualizarListaDespesas();
   }
 
   function atualizarListaDespesas() {
-    const ul = document.getElementById("listaDespesas")
-    ul.innerHTML = ""
-    despesasTemp.forEach((d, i) => {
-      const li = document.createElement("li")
-      li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`
-      ul.appendChild(li)
-    })
+    const ul = document.getElementById("listaDespesas");
+    ul.innerHTML = "";
+    despesasTemp.forEach((d) => {
+      const li = document.createElement("li");
+      li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`;
+      ul.appendChild(li);
+    });
   }
 
   function salvarAcerto() {
-    const data = document.getElementById("dataAcerto").value
-    const mot = document.getElementById("motorista").value
-    const cam = document.getElementById("caminhao").value
-    const frete = parseFloat(document.getElementById("frete").value)
-    const comissao = parseFloat(document.getElementById("comissao").value)
-    const adiant = parseFloat(document.getElementById("adiantamento").value)
-    const forma = document.getElementById("forma").value
-    const obs = document.getElementById("observacao").value
-
-    const despesas = despesasTemp.slice()
-    despesasTemp = []
-    atualizarListaDespesas()
-
-    const totalDespesas = despesas.reduce((t, d) => t + d.val, 0)
-    const sobra = frete - comissao - totalDespesas
-    const aPagar = comissao - adiant
-
+    const data = document.getElementById("dataAcerto").value;
+    const mot = document.getElementById("motorista").value;
+    const cam = document.getElementById("caminhao").value;
+    const frete = parseFloat(document.getElementById("frete").value);
+    const comissao = parseFloat(document.getElementById("comissao").value);
+    const forma = document.getElementById("forma").value;
+    const obs = document.getElementById("observacao").value;
+    const despesas = despesasTemp.slice();
+    despesasTemp = [];
+    atualizarListaDespesas();
+    const totalDespesas = despesas.reduce((t, d) => t + d.val, 0);
+    const sobra = frete - comissao - totalDespesas;
     const acerto = {
-      data, mot, cam, frete, comissao, adiant,
-      despesas, totalDespesas, sobra, aPagar,
-      forma, obs
-    }
-
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]")
-    lista.push(acerto)
-    localStorage.setItem("acertos", JSON.stringify(lista))
-    alert("Acerto salvo com sucesso!")
-    listarAcertos()
+      data, mot, cam, frete, comissao, despesas, totalDespesas, sobra, forma, obs
+    };
+    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+    lista.push(acerto);
+    localStorage.setItem("acertos", JSON.stringify(lista));
+    alert("Acerto salvo com sucesso!");
+    listarAcertos();
   }
 
   function listarAcertos() {
-    const inicio = document.getElementById("filtroInicio").value
-    const fim = document.getElementById("filtroFim").value
-    const tbody = document.getElementById("tabelaAcertos")
-    tbody.innerHTML = ""
-
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]")
+    const inicio = document.getElementById("filtroInicio").value;
+    const fim = document.getElementById("filtroFim").value;
+    const tbody = document.getElementById("tabelaAcertos");
+    tbody.innerHTML = "";
+    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
     lista.forEach((a, i) => {
       if (inicio && fim) {
-        const d = new Date(a.data)
-        if (d < new Date(inicio) || d > new Date(fim)) return
+        const d = new Date(a.data);
+        if (d < new Date(inicio) || d > new Date(fim)) return;
       }
-
-      const tr = document.createElement("tr")
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${a.data}</td>
         <td>${a.mot}</td>
         <td>${a.cam}</td>
         <td>R$ ${a.frete.toFixed(2)}</td>
         <td>R$ ${a.comissao.toFixed(2)}</td>
-        <td>R$ ${a.adiant.toFixed(2)}</td>
         <td>R$ ${a.totalDespesas.toFixed(2)}</td>
         <td><b>R$ ${a.sobra.toFixed(2)}</b></td>
-        <td><b>R$ ${a.aPagar.toFixed(2)}</b></td>
         <td><button onclick="gerarPDF(${i})">PDF</button></td>
-      `
-      tbody.appendChild(tr)
-    })
+      `;
+      tbody.appendChild(tr);
+    });
   }
 
   async function gerarPDF(index) {
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]")
-    const a = lista[index]
-
-    const { jsPDF } = window.jspdf
-    const doc = new jsPDF()
-
-    const empresa = localStorage.getItem("empresa_nome") || ""
-    if (empresa) doc.text(empresa, 105, 20, { align: "center" })
-
-    doc.setFontSize(14)
-    doc.text("Recibo de Pagamento - Acerto de Viagem", 105, 35, { align: "center" })
-
-    doc.setFontSize(12)
-    doc.text(`Data: ${a.data}`, 20, 50)
-    doc.text(`Motorista: ${a.mot}`, 20, 60)
-    doc.text(`Caminhão: ${a.cam}`, 20, 70)
-    doc.text(`Forma Pagamento: ${a.forma}`, 20, 80)
-    doc.text(`Observação: ${a.obs}`, 20, 90)
-
-    doc.text(`Frete: R$ ${a.frete.toFixed(2)}`, 20, 110)
-    doc.text(`Comissão: R$ ${a.comissao.toFixed(2)}`, 20, 120)
-    doc.text(`Adiantamento: R$ ${a.adiant.toFixed(2)}`, 20, 130)
-    doc.text(`Despesas: R$ ${a.totalDespesas.toFixed(2)}`, 20, 140)
-    doc.text(`Sobra: R$ ${a.sobra.toFixed(2)}`, 20, 150)
-    doc.text(`Valor a Pagar: R$ ${a.aPagar.toFixed(2)}`, 20, 160)
-
-    doc.line(20, 200, 80, 200)
-    doc.text("Assinatura do Motorista", 20, 205)
-
-    doc.line(120, 200, 180, 200)
-    doc.text("Assinatura do Proprietário", 120, 205)
-
-    doc.save(`recibo_acerto_${a.mot}.pdf`)
+    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+    const a = lista[index];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const empresa = localStorage.getItem("empresa_nome") || "";
+    if (empresa) doc.text(empresa, 105, 20, { align: "center" });
+    doc.setFontSize(14);
+    doc.text("Recibo de Pagamento - Acerto de Viagem", 105, 35, { align: "center" });
+    doc.setFontSize(12);
+    doc.text(`Data: ${a.data}`, 20, 50);
+    doc.text(`Motorista: ${a.mot}`, 20, 60);
+    doc.text(`Caminhão: ${a.cam}`, 20, 70);
+    doc.text(`Forma Pagamento: ${a.forma}`, 20, 80);
+    doc.text(`Observação: ${a.obs}`, 20, 90);
+    doc.text(`Frete: R$ ${a.frete.toFixed(2)}`, 20, 110);
+    doc.text(`Comissão: R$ ${a.comissao.toFixed(2)}`, 20, 120);
+    doc.text(`Despesas: R$ ${a.totalDespesas.toFixed(2)}`, 20, 130);
+    doc.text(`Sobra: R$ ${a.sobra.toFixed(2)}`, 20, 140);
+    doc.line(20, 200, 80, 200);
+    doc.text("Assinatura do Motorista", 20, 205);
+    doc.line(120, 200, 180, 200);
+    doc.text("Assinatura do Proprietário", 120, 205);
+    doc.save(`recibo_acerto_${a.mot}.pdf`);
   }
 </script>
 
