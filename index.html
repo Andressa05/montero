@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Controle de Acertos</title>
   <style>
     body {
@@ -10,35 +10,20 @@
       margin: 0; padding: 0;
       background: #f0f2f5;
     }
-
     .login, .app {
-      max-width: 500px;
-      margin: 50px auto;
+      max-width: 600px;
+      margin: 40px auto;
       padding: 20px;
       background: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    h2 {
-      text-align: center;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
+    h2 { text-align: center; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
     input, select, button, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
+      width: 100%; padding: 8px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
     }
-
     .btn {
       margin-top: 15px;
       background-color: #2e8b57;
@@ -46,47 +31,14 @@
       font-weight: bold;
       border: none;
     }
-
-    .btn:hover {
-      background-color: #246b45;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .flex {
-      display: flex;
-      gap: 10px;
-    }
-
-    .row {
-      margin-top: 10px;
-    }
-
-    .small {
-      font-size: 12px;
-      color: #555;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-
-    th, td {
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #eee;
-    }
+    .btn:hover { background-color: #246b45; }
+    .hidden { display: none; }
+    .flex { display: flex; gap: 10px; }
+    .row { margin-top: 10px; }
+    .small { font-size: 12px; color: #555; }
+    table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+    th, td { padding: 6px; border: 1px solid #ccc; text-align: center; }
+    #listaDespesasSelecionadas li { font-size: 13px; margin: 3px 0; }
   </style>
 </head>
 <body>
@@ -94,26 +46,83 @@
 <div class="login" id="loginBox">
   <h2>Login</h2>
   <label>Usuário:</label>
-  <input type="text" id="loginUser" />
+  <input type="text" id="loginUser" placeholder="" />
   <label>Senha:</label>
-  <input type="password" id="loginPass" />
+  <input type="password" id="loginPass" placeholder="" />
   <button class="btn" onclick="fazerLogin()">Entrar</button>
   <p id="loginErro" style="color:red; display:none;">Usuário ou senha inválidos.</p>
 </div>
 
 <div class="app hidden" id="appBox">
   <h2>Controle de Acertos</h2>
-  <label>Nome da Empresa (será usado no PDF):</label>
+
+  <label>Nome da Empresa (opcional no PDF):</label>
   <input type="text" id="empresaNome" placeholder="Ex: Transportadora XYZ" />
   <p class="small">Deixe em branco se não quiser exibir no PDF.</p>
-  <hr />
   <button class="btn" onclick="mostrarTelaAcertos()">Ir para Acertos</button>
 </div>
 
+<!-- === TELA DE ACERTOS === -->
+<div class="app hidden" id="telaAcertos">
+  <h2>Acertos de Viagem</h2>
+
+  <div class="row"><label>Data:</label><input type="date" id="dataAcerto" /></div>
+  <div class="row"><label>Motorista:</label><input type="text" id="motorista" /></div>
+  <div class="row"><label>Caminhão:</label><input type="text" id="caminhao" /></div>
+
+  <div class="flex row">
+    <div style="flex:1"><label>Frete (R$):</label><input type="number" id="frete" /></div>
+    <div style="flex:1"><label>Comissão (R$):</label><input type="number" id="comissao" /></div>
+  </div>
+
+  <label>Forma Pagamento:</label>
+  <select id="forma">
+    <option>Dinheiro</option><option>PIX</option><option>Transferência</option>
+  </select>
+
+  <label>Observação:</label>
+  <textarea id="observacao" rows="2"></textarea>
+
+  <label>Despesa:</label>
+  <div class="flex">
+    <input type="text" id="descDespesa" placeholder="Descrição" />
+    <input type="number" id="valorDespesa" placeholder="Valor (R$)" />
+    <button onclick="adicionarDespesa()">+</button>
+  </div>
+  <ul id="listaDespesas"></ul>
+
+  <button class="btn" onclick="salvarAcerto()">Salvar Acerto</button>
+
+  <hr />
+  <div class="flex row">
+    <input type="date" id="filtroInicio" />
+    <input type="date" id="filtroFim" />
+    <button onclick="listarAcertos()">Filtrar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr style="background:#eee">
+        <th>Data</th><th>Motorista</th><th>Caminhão</th><th>Frete</th><th>Comissão</th><th>Despesas</th><th>Sobra</th><th>PDF</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaAcertos"></tbody>
+  </table>
+
+  <h3>Despesas da Viagem:</h3>
+  <ul id="listaDespesasSelecionadas"></ul>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+  const loginUser = document.getElementById("loginUser");
+  const loginPass = document.getElementById("loginPass");
+  loginUser.value = "";
+  loginPass.value = "";
+
   function fazerLogin() {
-    const u = document.getElementById("loginUser").value.trim();
-    const s = document.getElementById("loginPass").value.trim();
+    const u = loginUser.value.trim();
+    const s = loginPass.value.trim();
     if (u === "master" && s === "123mudar") {
       document.getElementById("loginBox").classList.add("hidden");
       document.getElementById("appBox").classList.remove("hidden");
@@ -129,73 +138,7 @@
     document.getElementById("telaAcertos").classList.remove("hidden");
     listarAcertos();
   }
-</script>
 
-<div class="app hidden" id="telaAcertos">
-  <h2>Acertos de Viagem</h2>
-  <div class="row">
-    <label>Data:</label>
-    <input type="date" id="dataAcerto" />
-  </div>
-  <div class="row">
-    <label>Motorista:</label>
-    <input type="text" id="motorista" />
-  </div>
-  <div class="row">
-    <label>Caminhão:</label>
-    <input type="text" id="caminhao" />
-  </div>
-  <div class="flex row">
-    <div style="flex:1">
-      <label>Frete (R$):</label>
-      <input type="number" id="frete" />
-    </div>
-    <div style="flex:1">
-      <label>Comissão (R$):</label>
-      <input type="number" id="comissao" />
-    </div>
-  </div>
-  <div class="row">
-    <label>Forma Pagamento:</label>
-    <select id="forma">
-      <option>Dinheiro</option>
-      <option>PIX</option>
-      <option>Transferência</option>
-    </select>
-  </div>
-  <div class="row">
-    <label>Observação:</label>
-    <textarea id="observacao" rows="2"></textarea>
-  </div>
-  <div class="row">
-    <label>Despesa:</label>
-    <div class="flex">
-      <input type="text" id="descDespesa" placeholder="Descrição" />
-      <input type="number" id="valorDespesa" placeholder="Valor (R$)" />
-      <button onclick="adicionarDespesa()">+</button>
-    </div>
-    <ul id="listaDespesas"></ul>
-  </div>
-  <button class="btn" onclick="salvarAcerto()">Salvar Acerto</button>
-  <hr>
-  <div class="flex row">
-    <input type="date" id="filtroInicio" />
-    <input type="date" id="filtroFim" />
-    <button onclick="listarAcertos()">Filtrar</button>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th><th>Motorista</th><th>Caminhão</th><th>Frete</th><th>Comissão</th>
-        <th>Despesas</th><th>Sobra</th><th>PDF</th>
-      </tr>
-    </thead>
-    <tbody id="tabelaAcertos"></tbody>
-  </table>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
   let despesasTemp = [];
 
   function adicionarDespesa() {
@@ -211,7 +154,7 @@
   function atualizarListaDespesas() {
     const ul = document.getElementById("listaDespesas");
     ul.innerHTML = "";
-    despesasTemp.forEach((d) => {
+    despesasTemp.forEach((d, i) => {
       const li = document.createElement("li");
       li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`;
       ul.appendChild(li);
@@ -229,15 +172,19 @@
     const despesas = despesasTemp.slice();
     despesasTemp = [];
     atualizarListaDespesas();
+
     const totalDespesas = despesas.reduce((t, d) => t + d.val, 0);
     const sobra = frete - comissao - totalDespesas;
+
     const acerto = {
-      data, mot, cam, frete, comissao, despesas, totalDespesas, sobra, forma, obs
+      data, mot, cam, frete, comissao, despesas,
+      totalDespesas, sobra, forma, obs
     };
+
     const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
     lista.push(acerto);
     localStorage.setItem("acertos", JSON.stringify(lista));
-    alert("Acerto salvo com sucesso!");
+    alert("Acerto salvo!");
     listarAcertos();
   }
 
@@ -247,11 +194,13 @@
     const tbody = document.getElementById("tabelaAcertos");
     tbody.innerHTML = "";
     const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+
     lista.forEach((a, i) => {
       if (inicio && fim) {
         const d = new Date(a.data);
         if (d < new Date(inicio) || d > new Date(fim)) return;
       }
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${a.data}</td>
@@ -262,9 +211,33 @@
         <td>R$ ${a.totalDespesas.toFixed(2)}</td>
         <td><b>R$ ${a.sobra.toFixed(2)}</b></td>
         <td><button onclick="gerarPDF(${i})">PDF</button></td>
+        <td>
+          <button onclick="exibirDespesas(${i})">Ver</button>
+          <button onclick="excluir(${i})">X</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
+  }
+
+  function exibirDespesas(i) {
+    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+    const despesas = lista[i].despesas || [];
+    const ul = document.getElementById("listaDespesasSelecionadas");
+    ul.innerHTML = "";
+    despesas.forEach(d => {
+      const li = document.createElement("li");
+      li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`;
+      ul.appendChild(li);
+    });
+  }
+
+  function excluir(i) {
+    if (!confirm("Excluir este acerto?")) return;
+    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+    lista.splice(i, 1);
+    localStorage.setItem("acertos", JSON.stringify(lista));
+    listarAcertos();
   }
 
   async function gerarPDF(index) {
@@ -282,14 +255,11 @@
     doc.text(`Caminhão: ${a.cam}`, 20, 70);
     doc.text(`Forma Pagamento: ${a.forma}`, 20, 80);
     doc.text(`Observação: ${a.obs}`, 20, 90);
-    doc.text(`Frete: R$ ${a.frete.toFixed(2)}`, 20, 110);
-    doc.text(`Comissão: R$ ${a.comissao.toFixed(2)}`, 20, 120);
-    doc.text(`Despesas: R$ ${a.totalDespesas.toFixed(2)}`, 20, 130);
-    doc.text(`Sobra: R$ ${a.sobra.toFixed(2)}`, 20, 140);
-    doc.line(20, 200, 80, 200);
-    doc.text("Assinatura do Motorista", 20, 205);
-    doc.line(120, 200, 180, 200);
-    doc.text("Assinatura do Proprietário", 120, 205);
+    doc.text(`Comissão: R$ ${a.comissao.toFixed(2)}`, 20, 110);
+    doc.line(20, 160, 80, 160);
+    doc.text("Assinatura do Motorista", 20, 165);
+    doc.line(120, 160, 180, 160);
+    doc.text("Assinatura do Proprietário", 120, 165);
     doc.save(`recibo_acerto_${a.mot}.pdf`);
   }
 </script>
