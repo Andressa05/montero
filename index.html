@@ -2,28 +2,44 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Acertos</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       background: #f0f2f5;
     }
+
     .login, .app {
-      max-width: 600px;
-      margin: 40px auto;
+      max-width: 500px;
+      margin: 50px auto;
       padding: 20px;
       background: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    h2 { text-align: center; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input, select, button, textarea {
-      width: 100%; padding: 8px; margin-top: 5px;
-      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+
+    h2 {
+      text-align: center;
     }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select, button, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
     .btn {
       margin-top: 15px;
       background-color: #2e8b57;
@@ -31,14 +47,47 @@
       font-weight: bold;
       border: none;
     }
-    .btn:hover { background-color: #246b45; }
-    .hidden { display: none; }
-    .flex { display: flex; gap: 10px; }
-    .row { margin-top: 10px; }
-    .small { font-size: 12px; color: #555; }
-    table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-    th, td { padding: 6px; border: 1px solid #ccc; text-align: center; }
-    #listaDespesasSelecionadas li { font-size: 13px; margin: 3px 0; }
+
+    .btn:hover {
+      background-color: #246b45;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .flex {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row {
+      margin-top: 10px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .sobra-negativa {
+      color: red;
+    }
+
+    .sobra-positiva {
+      color: green;
+    }
+
+    .icon-eye {
+      position: absolute;
+      right: 10px;
+      top: 37px;
+      cursor: pointer;
+    }
+
+    .senha-container {
+      position: relative;
+    }
   </style>
 </head>
 <body>
@@ -46,222 +95,44 @@
 <div class="login" id="loginBox">
   <h2>Login</h2>
   <label>Usuário:</label>
-  <input type="text" id="loginUser" placeholder="" />
+  <input type="text" id="loginUser" placeholder="" autocomplete="off" />
+
   <label>Senha:</label>
-  <input type="password" id="loginPass" placeholder="" />
+  <div class="senha-container">
+    <input type="password" id="loginPass" placeholder="" autocomplete="off" />
+    <span class="icon-eye" onclick="toggleSenha()">👁️</span>
+  </div>
+
   <button class="btn" onclick="fazerLogin()">Entrar</button>
   <p id="loginErro" style="color:red; display:none;">Usuário ou senha inválidos.</p>
 </div>
 
 <div class="app hidden" id="appBox">
-  <h2>Controle de Acertos</h2>
-
-  <label>Nome da Empresa (opcional no PDF):</label>
-  <input type="text" id="empresaNome" placeholder="Ex: Transportadora XYZ" />
-  <p class="small">Deixe em branco se não quiser exibir no PDF.</p>
-  <button class="btn" onclick="mostrarTelaAcertos()">Ir para Acertos</button>
+  <!-- Continuação do sistema será carregada aqui -->
 </div>
 
-<!-- === TELA DE ACERTOS === -->
-<div class="app hidden" id="telaAcertos">
-  <h2>Acertos de Viagem</h2>
-
-  <div class="row"><label>Data:</label><input type="date" id="dataAcerto" /></div>
-  <div class="row"><label>Motorista:</label><input type="text" id="motorista" /></div>
-  <div class="row"><label>Caminhão:</label><input type="text" id="caminhao" /></div>
-
-  <div class="flex row">
-    <div style="flex:1"><label>Frete (R$):</label><input type="number" id="frete" /></div>
-    <div style="flex:1"><label>Comissão (R$):</label><input type="number" id="comissao" /></div>
-  </div>
-
-  <label>Forma Pagamento:</label>
-  <select id="forma">
-    <option>Dinheiro</option><option>PIX</option><option>Transferência</option>
-  </select>
-
-  <label>Observação:</label>
-  <textarea id="observacao" rows="2"></textarea>
-
-  <label>Despesa:</label>
-  <div class="flex">
-    <input type="text" id="descDespesa" placeholder="Descrição" />
-    <input type="number" id="valorDespesa" placeholder="Valor (R$)" />
-    <button onclick="adicionarDespesa()">+</button>
-  </div>
-  <ul id="listaDespesas"></ul>
-
-  <button class="btn" onclick="salvarAcerto()">Salvar Acerto</button>
-
-  <hr />
-  <div class="flex row">
-    <input type="date" id="filtroInicio" />
-    <input type="date" id="filtroFim" />
-    <button onclick="listarAcertos()">Filtrar</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr style="background:#eee">
-        <th>Data</th><th>Motorista</th><th>Caminhão</th><th>Frete</th><th>Comissão</th><th>Despesas</th><th>Sobra</th><th>PDF</th><th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabelaAcertos"></tbody>
-  </table>
-
-  <h3>Despesas da Viagem:</h3>
-  <ul id="listaDespesasSelecionadas"></ul>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  const loginUser = document.getElementById("loginUser");
-  const loginPass = document.getElementById("loginPass");
-  loginUser.value = "";
-  loginPass.value = "";
+function toggleSenha() {
+  const pass = document.getElementById("loginPass")
+  pass.type = pass.type === "password" ? "text" : "password"
+}
 
-  function fazerLogin() {
-    const u = loginUser.value.trim();
-    const s = loginPass.value.trim();
-    if (u === "master" && s === "123mudar") {
-      document.getElementById("loginBox").classList.add("hidden");
-      document.getElementById("appBox").classList.remove("hidden");
-    } else {
-      document.getElementById("loginErro").style.display = "block";
-    }
+function fazerLogin() {
+  const u = document.getElementById("loginUser").value.trim();
+  const s = document.getElementById("loginPass").value.trim();
+  if (u === "master" && s === "123mudar") {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("appBox").classList.remove("hidden");
+    iniciarSistema();
+  } else {
+    document.getElementById("loginErro").style.display = "block";
   }
+}
 
-  function mostrarTelaAcertos() {
-    const empresa = document.getElementById("empresaNome").value.trim();
-    localStorage.setItem("empresa_nome", empresa);
-    document.getElementById("appBox").classList.add("hidden");
-    document.getElementById("telaAcertos").classList.remove("hidden");
-    listarAcertos();
-  }
-
-  let despesasTemp = [];
-
-  function adicionarDespesa() {
-    const desc = document.getElementById("descDespesa").value;
-    const val = parseFloat(document.getElementById("valorDespesa").value);
-    if (!desc || isNaN(val)) return alert("Preencha despesa e valor.");
-    despesasTemp.push({ desc, val });
-    document.getElementById("descDespesa").value = "";
-    document.getElementById("valorDespesa").value = "";
-    atualizarListaDespesas();
-  }
-
-  function atualizarListaDespesas() {
-    const ul = document.getElementById("listaDespesas");
-    ul.innerHTML = "";
-    despesasTemp.forEach((d, i) => {
-      const li = document.createElement("li");
-      li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`;
-      ul.appendChild(li);
-    });
-  }
-
-  function salvarAcerto() {
-    const data = document.getElementById("dataAcerto").value;
-    const mot = document.getElementById("motorista").value;
-    const cam = document.getElementById("caminhao").value;
-    const frete = parseFloat(document.getElementById("frete").value);
-    const comissao = parseFloat(document.getElementById("comissao").value);
-    const forma = document.getElementById("forma").value;
-    const obs = document.getElementById("observacao").value;
-    const despesas = despesasTemp.slice();
-    despesasTemp = [];
-    atualizarListaDespesas();
-
-    const totalDespesas = despesas.reduce((t, d) => t + d.val, 0);
-    const sobra = frete - comissao - totalDespesas;
-
-    const acerto = {
-      data, mot, cam, frete, comissao, despesas,
-      totalDespesas, sobra, forma, obs
-    };
-
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
-    lista.push(acerto);
-    localStorage.setItem("acertos", JSON.stringify(lista));
-    alert("Acerto salvo!");
-    listarAcertos();
-  }
-
-  function listarAcertos() {
-    const inicio = document.getElementById("filtroInicio").value;
-    const fim = document.getElementById("filtroFim").value;
-    const tbody = document.getElementById("tabelaAcertos");
-    tbody.innerHTML = "";
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
-
-    lista.forEach((a, i) => {
-      if (inicio && fim) {
-        const d = new Date(a.data);
-        if (d < new Date(inicio) || d > new Date(fim)) return;
-      }
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${a.data}</td>
-        <td>${a.mot}</td>
-        <td>${a.cam}</td>
-        <td>R$ ${a.frete.toFixed(2)}</td>
-        <td>R$ ${a.comissao.toFixed(2)}</td>
-        <td>R$ ${a.totalDespesas.toFixed(2)}</td>
-        <td><b>R$ ${a.sobra.toFixed(2)}</b></td>
-        <td><button onclick="gerarPDF(${i})">PDF</button></td>
-        <td>
-          <button onclick="exibirDespesas(${i})">Ver</button>
-          <button onclick="excluir(${i})">X</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function exibirDespesas(i) {
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
-    const despesas = lista[i].despesas || [];
-    const ul = document.getElementById("listaDespesasSelecionadas");
-    ul.innerHTML = "";
-    despesas.forEach(d => {
-      const li = document.createElement("li");
-      li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`;
-      ul.appendChild(li);
-    });
-  }
-
-  function excluir(i) {
-    if (!confirm("Excluir este acerto?")) return;
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
-    lista.splice(i, 1);
-    localStorage.setItem("acertos", JSON.stringify(lista));
-    listarAcertos();
-  }
-
-  async function gerarPDF(index) {
-    const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
-    const a = lista[index];
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const empresa = localStorage.getItem("empresa_nome") || "";
-    if (empresa) doc.text(empresa, 105, 20, { align: "center" });
-    doc.setFontSize(14);
-    doc.text("Recibo de Pagamento - Acerto de Viagem", 105, 35, { align: "center" });
-    doc.setFontSize(12);
-    doc.text(`Data: ${a.data}`, 20, 50);
-    doc.text(`Motorista: ${a.mot}`, 20, 60);
-    doc.text(`Caminhão: ${a.cam}`, 20, 70);
-    doc.text(`Forma Pagamento: ${a.forma}`, 20, 80);
-    doc.text(`Observação: ${a.obs}`, 20, 90);
-    doc.text(`Comissão: R$ ${a.comissao.toFixed(2)}`, 20, 110);
-    doc.line(20, 160, 80, 160);
-    doc.text("Assinatura do Motorista", 20, 165);
-    doc.line(120, 160, 180, 160);
-    doc.text("Assinatura do Proprietário", 120, 165);
-    doc.save(`recibo_acerto_${a.mot}.pdf`);
-  }
+function iniciarSistema() {
+  // Aqui você pode carregar o restante do sistema dinamicamente se quiser.
+  document.getElementById("appBox").innerHTML = '<h2>Bem-vindo ao sistema</h2><p>Pronto para cadastrar acertos.</p>';
+}
 </script>
 
 </body>
