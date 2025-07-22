@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Acertos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,26 +12,22 @@
       padding: 0;
       background: #f0f2f5;
     }
-
     .login, .app {
-      max-width: 500px;
-      margin: 50px auto;
+      max-width: 600px;
+      margin: 40px auto;
       padding: 20px;
       background: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     h2 {
       text-align: center;
     }
-
     label {
       display: block;
       margin-top: 10px;
       font-weight: bold;
     }
-
     input, select, button, textarea {
       width: 100%;
       padding: 8px;
@@ -39,101 +36,229 @@
       border-radius: 6px;
       box-sizing: border-box;
     }
-
     .btn {
       margin-top: 15px;
       background-color: #2e8b57;
       color: white;
       font-weight: bold;
       border: none;
+      cursor: pointer;
     }
-
     .btn:hover {
       background-color: #246b45;
     }
-
     .hidden {
       display: none;
     }
-
-    .flex {
-      display: flex;
-      gap: 10px;
-    }
-
-    .row {
-      margin-top: 10px;
-    }
-
-    .small {
-      font-size: 12px;
-      color: #555;
-    }
-
-    .sobra-negativa {
-      color: red;
-    }
-
-    .sobra-positiva {
-      color: green;
-    }
-
+    .flex { display: flex; gap: 10px; }
+    .row { margin-top: 10px; }
     .icon-eye {
       position: absolute;
-      right: 10px;
-      top: 37px;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
       cursor: pointer;
     }
-
     .senha-container {
       position: relative;
+    }
+    .sobra-negativa { color: red; }
+    .sobra-positiva { color: green; }
+    table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+    th { background-color: #eee; }
+    .total-box {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-
 <div class="login" id="loginBox">
   <h2>Login</h2>
   <label>Usuário:</label>
-  <input type="text" id="loginUser" placeholder="" autocomplete="off" />
-
+  <input type="text" id="loginUser" autocomplete="off" />
   <label>Senha:</label>
   <div class="senha-container">
-    <input type="password" id="loginPass" placeholder="" autocomplete="off" />
+    <input type="password" id="loginPass" autocomplete="off" />
     <span class="icon-eye" onclick="toggleSenha()">👁️</span>
   </div>
-
   <button class="btn" onclick="fazerLogin()">Entrar</button>
   <p id="loginErro" style="color:red; display:none;">Usuário ou senha inválidos.</p>
 </div>
-
 <div class="app hidden" id="appBox">
-  <!-- Continuação do sistema será carregada aqui -->
+  <h2>Acertos de Viagem</h2>
+  <div class="row"><label>Data:</label><input type="date" id="data" /></div>
+  <div class="row"><label>Motorista:</label><input type="text" id="motorista" /></div>
+  <div class="row"><label>Caminhão:</label><input type="text" id="caminhao" /></div>
+  <div class="flex row">
+    <div style="flex:1">
+      <label>Frete (R$):</label><input type="number" id="frete" />
+    </div>
+    <div style="flex:1">
+      <label>Comissão (R$):</label><input type="number" id="comissao" />
+    </div>
+  </div>
+  <div class="row"><label>Forma Pagamento:</label>
+    <select id="forma"><option>Dinheiro</option><option>PIX</option><option>Transferência</option></select>
+  </div>
+  <div class="row"><label>Observação:</label><textarea id="obs"></textarea></div>
+  <div class="row"><label>Despesas:</label>
+    <div class="flex">
+      <input type="text" id="descDespesa" placeholder="Descrição" />
+      <input type="number" id="valorDespesa" placeholder="Valor" />
+      <button onclick="adicionarDespesa()">+</button>
+    </div>
+    <ul id="listaDespesas"></ul>
+  </div>
+  <button class="btn" onclick="salvarAcerto()">Salvar Acerto</button>
+  <hr />
+  <div class="flex row">
+    <input type="text" id="filtroMotorista" placeholder="Filtrar Motorista" />
+    <input type="date" id="filtroInicio" />
+    <input type="date" id="filtroFim" />
+    <button onclick="listarAcertos()">Ver</button>
+  </div>
+  <div class="total-box">
+    <div>Total Despesas: R$ <span id="somaDespesas">0.00</span></div>
+    <div>Total Sobra: R$ <span id="somaSobra" class="sobra-positiva">0.00</span></div>
+  </div>
+  <table>
+    <thead><tr><th>Data</th><th>Motorista</th><th>Caminhão</th><th>Frete</th><th>Comissão</th><th>Despesas</th><th>Sobra</th><th>PDF</th><th>Ações</th></tr></thead>
+    <tbody id="tabelaAcertos"></tbody>
+  </table>
 </div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 function toggleSenha() {
   const pass = document.getElementById("loginPass")
   pass.type = pass.type === "password" ? "text" : "password"
 }
-
 function fazerLogin() {
   const u = document.getElementById("loginUser").value.trim();
   const s = document.getElementById("loginPass").value.trim();
   if (u === "master" && s === "123mudar") {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("appBox").classList.remove("hidden");
-    iniciarSistema();
+    listarAcertos();
   } else {
     document.getElementById("loginErro").style.display = "block";
   }
 }
-
-function iniciarSistema() {
-  // Aqui você pode carregar o restante do sistema dinamicamente se quiser.
-  document.getElementById("appBox").innerHTML = '<h2>Bem-vindo ao sistema</h2><p>Pronto para cadastrar acertos.</p>';
+let despesasTemp = [];
+let editandoIndex = -1;
+function adicionarDespesa() {
+  const desc = document.getElementById("descDespesa").value;
+  const val = parseFloat(document.getElementById("valorDespesa").value);
+  if (!desc || isNaN(val)) return;
+  despesasTemp.push({ desc, val });
+  document.getElementById("descDespesa").value = "";
+  document.getElementById("valorDespesa").value = "";
+  atualizarListaDespesas();
+}
+function atualizarListaDespesas() {
+  const ul = document.getElementById("listaDespesas");
+  ul.innerHTML = "";
+  despesasTemp.forEach((d, i) => {
+    const li = document.createElement("li");
+    li.innerText = `${d.desc} - R$ ${d.val.toFixed(2)}`;
+    ul.appendChild(li);
+  });
+}
+function salvarAcerto() {
+  const data = document.getElementById("data").value;
+  const mot = document.getElementById("motorista").value;
+  const cam = document.getElementById("caminhao").value;
+  const frete = parseFloat(document.getElementById("frete").value);
+  const comissao = parseFloat(document.getElementById("comissao").value);
+  const forma = document.getElementById("forma").value;
+  const obs = document.getElementById("obs").value;
+  const despesas = despesasTemp.slice();
+  const totalDespesas = despesas.reduce((t, d) => t + d.val, 0);
+  const sobra = frete - comissao - totalDespesas;
+  const acerto = { data, mot, cam, frete, comissao, forma, obs, despesas, totalDespesas, sobra };
+  let lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+  if (editandoIndex >= 0) { lista[editandoIndex] = acerto; editandoIndex = -1; }
+  else lista.push(acerto);
+  localStorage.setItem("acertos", JSON.stringify(lista));
+  despesasTemp = [];
+  atualizarListaDespesas();
+  document.querySelectorAll('#data, #motorista, #caminhao, #frete, #comissao, #obs').forEach(el => el.value = "");
+  listarAcertos();
+}
+function listarAcertos() {
+  const lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+  const tbody = document.getElementById("tabelaAcertos");
+  tbody.innerHTML = "";
+  const filtroM = document.getElementById("filtroMotorista").value.toLowerCase();
+  const inicio = document.getElementById("filtroInicio").value;
+  const fim = document.getElementById("filtroFim").value;
+  let totalDespesas = 0, totalSobra = 0;
+  lista.forEach((a, i) => {
+    if (filtroM && !a.mot.toLowerCase().includes(filtroM)) return;
+    const d = new Date(a.data);
+    if (inicio && d < new Date(inicio)) return;
+    if (fim && d > new Date(fim)) return;
+    totalDespesas += a.totalDespesas;
+    totalSobra += a.sobra;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${a.data}</td><td>${a.mot}</td><td>${a.cam}</td>
+      <td>R$ ${a.frete.toFixed(2)}</td>
+      <td>R$ ${a.comissao.toFixed(2)}</td>
+      <td>R$ ${a.totalDespesas.toFixed(2)}</td>
+      <td class="${a.sobra < 0 ? 'sobra-negativa' : 'sobra-positiva'}"><b>R$ ${a.sobra.toFixed(2)}</b></td>
+      <td><button onclick="gerarPDF(${i})">PDF</button></td>
+      <td>
+        <button onclick="editarAcerto(${i})">✏️</button>
+        <button onclick="excluirAcerto(${i})"><i class='fas fa-trash'></i></button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("somaDespesas").innerText = totalDespesas.toFixed(2);
+  document.getElementById("somaSobra").innerText = totalSobra.toFixed(2);
+  document.getElementById("somaSobra").className = totalSobra < 0 ? "sobra-negativa" : "sobra-positiva";
+}
+function editarAcerto(index) {
+  const a = JSON.parse(localStorage.getItem("acertos"))[index];
+  document.getElementById("data").value = a.data;
+  document.getElementById("motorista").value = a.mot;
+  document.getElementById("caminhao").value = a.cam;
+  document.getElementById("frete").value = a.frete;
+  document.getElementById("comissao").value = a.comissao;
+  document.getElementById("forma").value = a.forma;
+  document.getElementById("obs").value = a.obs;
+  despesasTemp = a.despesas;
+  atualizarListaDespesas();
+  editandoIndex = index;
+}
+function excluirAcerto(index) {
+  let lista = JSON.parse(localStorage.getItem("acertos") || "[]");
+  if (!confirm("Deseja excluir este acerto?")) return;
+  lista.splice(index, 1);
+  localStorage.setItem("acertos", JSON.stringify(lista));
+  listarAcertos();
+}
+async function gerarPDF(index) {
+  const { jsPDF } = window.jspdf;
+  const a = JSON.parse(localStorage.getItem("acertos"))[index];
+  const doc = new jsPDF();
+  doc.text("Recibo de Pagamento - Acerto de Viagem", 105, 20, { align: "center" });
+  doc.text(`Data: ${a.data}`, 20, 40);
+  doc.text(`Motorista: ${a.mot}`, 20, 50);
+  doc.text(`Caminhão: ${a.cam}`, 20, 60);
+  doc.text(`Forma de Pagamento: ${a.forma}`, 20, 70);
+  doc.text(`Observação: ${a.obs}`, 20, 80);
+  doc.setFontSize(14);
+  doc.text(`Valor da Comissão: R$ ${a.comissao.toFixed(2)}`, 20, 100);
+  doc.line(20, 140, 90, 140);
+  doc.text("Assinatura do Motorista", 20, 145);
+  doc.line(120, 140, 190, 140);
+  doc.text("Assinatura do Proprietário", 120, 145);
+  doc.save(`recibo_${a.mot}.pdf`);
 }
 </script>
-
 </body>
 </html>
