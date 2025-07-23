@@ -123,32 +123,47 @@
   <tbody id="corpoTabela"></tbody>
 </table>
 
-  <script>
+ <script>
+  // Verifica se já está logado ao carregar
+  if (localStorage.getItem("logado") === "sim") {
+    document.getElementById('telaLogin').style.display = 'none';
+    document.getElementById('telaPrincipal').style.display = 'block';
+    renderConteudo(); // se existir
+    carregarAcertos();
+  }
 
-    const formLogin = document.getElementById('formLogin');
-    const erroLogin = document.getElementById('erroLogin');
+  const formLogin = document.getElementById('formLogin');
+  const erroLogin = document.getElementById('erroLogin');
 
-    formLogin.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const user = document.getElementById('usuario').value.trim();
-      const senha = document.getElementById('senha').value;
+  formLogin.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const user = document.getElementById('usuario').value.trim();
+    const senha = document.getElementById('senha').value;
 
-      if (user === 'master' && senha === '123mudar') {
-  localStorage.setItem('logado', 'sim');
-  document.getElementById('telaLogin').style.display = 'none';
-  document.getElementById('telaPrincipal').style.display = 'block';
-  renderConteudo(); // se você estiver usando renderConteudo()
-  carregarAcertos();
-} else {
-  erroLogin.textContent = 'Usuário ou senha inválidos.';
-}
-
-    function toggleSenha() {
-      const senhaInput = document.getElementById('senha');
-      senhaInput.type = senhaInput.type === 'password' ? 'text' : 'password';
+    if (user === 'master' && senha === '123mudar') {
+      localStorage.setItem('logado', 'sim');
+      document.getElementById('telaLogin').style.display = 'none';
+      document.getElementById('telaPrincipal').style.display = 'block';
+      renderConteudo(); // se você estiver usando essa função
+      carregarAcertos();
+    } else {
+      erroLogin.textContent = 'Usuário ou senha inválidos.';
     }
-  </script>
-<script>
+  });
+
+  // Função para mostrar/ocultar senha
+  function toggleSenha() {
+    const senhaInput = document.getElementById('senha');
+    senhaInput.type = senhaInput.type === 'password' ? 'text' : 'password';
+  }
+
+  // Função para sair
+  function logout() {
+    localStorage.removeItem("logado");
+    location.reload();
+  }
+</script>
+
   let despesas = [];
 
   function adicionarDespesa() {
